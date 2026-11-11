@@ -92,7 +92,7 @@ export default async function DashboardPage() {
         }
       />
 
-      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6 max-w-7xl mx-auto">
         {/* Database Diagnostic Banner (only shown if Supabase returns an error) */}
         {!dbStatus.ok && (
           <div className="bg-amber-50 border border-amber-200 rounded-3xl p-4 flex items-start gap-3 text-xs text-amber-900">

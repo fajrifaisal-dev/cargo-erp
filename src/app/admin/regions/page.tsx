@@ -21,7 +21,7 @@ export default async function AdminRegionsPage() {
         badge={`${regions.length} Wilayah`}
       />
 
-      <div className="p-6 max-w-6xl mx-auto">
+      <div className="p-3.5 sm:p-6 max-w-6xl mx-auto">
         <RegionManagementClient regions={regions} tableReady={tableReady} />
       </div>
     </div>

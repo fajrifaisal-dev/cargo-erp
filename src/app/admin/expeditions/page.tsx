@@ -28,7 +28,7 @@ export default async function AdminExpeditionsPage() {
         actions={<ExpeditionModal mode="create" />}
       />
 
-      <div className="p-6 max-w-7xl mx-auto space-y-5 text-xs">
+      <div className="p-3.5 sm:p-6 max-w-7xl mx-auto space-y-4 sm:space-y-5 text-xs">
         {/* Admin Context Note */}
         <div className="bg-white border border-slate-200 rounded-3xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-3">

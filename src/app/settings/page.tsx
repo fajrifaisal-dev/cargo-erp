@@ -20,8 +20,8 @@ export default async function SettingsPage() {
         subtitle="Profil resmi perusahaan dan warna tema aplikasi (otomatis diterapkan ke seluruh UI & cetakan dokumen)."
       />
 
-      <div className="p-6 max-w-4xl mx-auto text-xs">
-        <CompanySettingsForm company={company} />
+      <div className="p-3.5 sm:p-6 max-w-4xl mx-auto text-xs">
+        <CompanySettingsForm key={company?.id || 'default'} company={company} />
       </div>
     </div>
   );

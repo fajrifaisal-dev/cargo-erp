@@ -38,7 +38,7 @@ export default async function AccountPage() {
         subtitle="Kelola password dan aktivasi Google Authenticator (2FA) untuk akun Anda."
       />
 
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-3.5 sm:p-6 max-w-4xl mx-auto">
         <MfaSecurityPanel
           username={auth.profile?.username || ''}
           email={auth.email}

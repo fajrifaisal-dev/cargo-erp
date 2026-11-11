@@ -76,7 +76,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
         </form>
       </ControlPanel>
 
-      <div className="p-6 max-w-7xl mx-auto text-xs">
+      <div className="p-3.5 sm:p-6 max-w-7xl mx-auto text-xs">
         <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
           {invoices.length === 0 ? (
             <div className="p-12 text-center">

@@ -15,6 +15,12 @@ import {
   sanitizeNonNegativeAmount,
   sanitizeNonNegativeFloat,
 } from '../security-rules';
+import {
+  buildMemberImportPreview,
+  mapHeaderToField,
+  normalizeMemberName,
+  parseIntegerCell,
+} from '../member-import';
 
 describe('Cargo Calculations & Tenant Formatting', () => {
   it('calculates volumetric weight (P x L x T / 4000)', () => {
@@ -119,5 +125,81 @@ describe('Server Financial Validation & RBAC Guards', () => {
     assert.equal(resolveAuthorizedCompany(allowed, 'tenant-b')?.id, 'tenant-b');
     assert.equal(resolveAuthorizedCompany(allowed, 'tenant-hack')?.id, 'tenant-a');
     assert.equal(resolveAuthorizedCompany([], 'tenant-a'), null);
+  });
+});
+
+describe('Member Excel Import Deduplication & Parsing', () => {
+  it('normalizes member names case-insensitively with collapsed whitespace', () => {
+    assert.equal(normalizeMemberName('  PT.  Maju   Jaya '), 'pt. maju jaya');
+    assert.equal(normalizeMemberName('pt. maju jaya'), 'pt. maju jaya');
+  });
+
+  it('maps Indonesian and English Excel headers accurately', () => {
+    assert.equal(mapHeaderToField('Nama Perusahaan *'), 'name');
+    assert.equal(mapHeaderToField('No. HP / WhatsApp'), 'phone');
+    assert.equal(mapHeaderToField('Alamat'), 'address');
+    assert.equal(mapHeaderToField('TOP (Hari)'), 'payment_term_days');
+    assert.equal(mapHeaderToField('Plafon Kredit'), 'credit_limit');
+    assert.equal(mapHeaderToField('Kolom Tidak Dikenal'), null);
+  });
+
+  it('parses integer TOP and formatted Rupiah credit limits safely', () => {
+    assert.deepEqual(parseIntegerCell('14 hari', 14), { value: 14, valid: true });
+    assert.deepEqual(parseIntegerCell('Rp 15.000.000', 0), { value: 15000000, valid: true });
+    assert.deepEqual(parseIntegerCell('bukan-angka', 0), { value: 0, valid: false });
+  });
+
+  it('detects DB duplicates, intra-file duplicates, and invalid rows by normalized name', () => {
+    const existing = [
+      { id: 'm-1', name: 'PT. Sinar Harapan' },
+    ];
+    const preview = buildMemberImportPreview(
+      [
+        {
+          rowNumber: 2,
+          name: '  pt. sinar   harapan ',
+          phone: '08123456789',
+          address: 'Surabaya',
+          payment_term_days: 30,
+          credit_limit: '25.000.000',
+        },
+        {
+          rowNumber: 3,
+          name: 'CV. Bintang Timur',
+          phone: '08111222333',
+          address: 'Makassar',
+          payment_term_days: 14,
+          credit_limit: 0,
+        },
+        {
+          rowNumber: 4,
+          name: 'cv. bintang timur',
+          phone: '089999999',
+          address: 'Kendari',
+          payment_term_days: 7,
+          credit_limit: 0,
+        },
+        {
+          rowNumber: 5,
+          name: '',
+          phone: '08123',
+          address: 'Jakarta',
+          payment_term_days: 14,
+          credit_limit: 0,
+        },
+      ],
+      existing
+    );
+
+    assert.equal(preview.summary.total, 4);
+    assert.equal(preview.summary.duplicateDb, 1);
+    assert.equal(preview.summary.validNew, 1);
+    assert.equal(preview.summary.duplicateFile, 1);
+    assert.equal(preview.summary.invalid, 1);
+    assert.equal(preview.rows[0].status, 'duplicate_db');
+    assert.equal(preview.rows[0].existingMemberId, 'm-1');
+    assert.equal(preview.rows[1].status, 'new');
+    assert.equal(preview.rows[2].status, 'duplicate_file');
+    assert.equal(preview.rows[3].status, 'invalid');
   });
 });

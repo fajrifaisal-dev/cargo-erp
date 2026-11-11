@@ -124,7 +124,7 @@ export function LoginForm({
             </div>
             <div>
               <div className="text-lg font-extrabold tracking-wide text-gray-900 leading-none">
-                GEMA TRANS
+                CARGO ERP
               </div>
               <div className="text-[10px] font-semibold tracking-[0.2em] text-slate-400 uppercase mt-1">
                 LOGISTICS MANAGEMENT SYSTEM

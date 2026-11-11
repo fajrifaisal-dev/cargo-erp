@@ -14,7 +14,7 @@ export default async function NewShipmentPage() {
   ]);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-3.5 sm:p-6 max-w-6xl mx-auto">
       <CreateShipmentForm
         members={members}
         regions={regions}

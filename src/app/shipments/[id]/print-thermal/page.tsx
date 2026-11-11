@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import Link from 'next/link';
 import QRCode from 'qrcode';
 import { getShipmentById } from '@/app/actions/shipments';
@@ -31,9 +32,8 @@ export default async function PrintThermalPage({
   if (!shipment) notFound();
 
   const company = shipment.company || activeCompany;
-  const companyName = company?.name || 'PT. GEMA TUNGGAL PERKASA';
-  const companyAddress =
-    company?.address || 'Jl. Kalimas Baru No.87, Perak Utara, Surabaya';
+  const companyName = company?.name || 'EKSPEDISI CARGO';
+  const companyAddress = company?.address || '-';
   const items = shipment.items || [];
   const totalKoli = items.length;
 
@@ -53,7 +53,19 @@ export default async function PrintThermalPage({
 
   const visibleItems =
     totalKoli === 0 ? [] : items.slice(fromKoli - 1, toKoli);
-  const qrPayload = `STT:${shipment.receipt_number}|${shipment.origin_city}-${shipment.destination_city}|KOLI:${totalKoli}`;
+  const reqHeaders = await headers();
+  const forwardedHost =
+    reqHeaders.get('x-forwarded-host') || reqHeaders.get('host');
+  const forwardedProto =
+    reqHeaders.get('x-forwarded-proto') ||
+    (forwardedHost?.includes('localhost') || forwardedHost?.startsWith('127.')
+      ? 'http'
+      : 'https');
+  const envBase = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/+$/, '');
+  const baseUrl =
+    envBase || (forwardedHost ? `${forwardedProto}://${forwardedHost}` : '');
+  const trackingPath = `/track/${encodeURIComponent(shipment.receipt_number)}`;
+  const qrPayload = baseUrl ? `${baseUrl}${trackingPath}` : trackingPath;
   const qrSvg = await QRCode.toString(qrPayload, {
     type: 'svg',
     margin: 0,
@@ -183,10 +195,8 @@ export default async function PrintThermalPage({
 
               {/* Footer */}
               <div className="text-center pt-1 space-y-0.5">
-                <div className="text-[9px] font-extrabold uppercase tracking-wider">
-                  {company?.slug
-                    ? `HTTPS://${company.slug.toUpperCase()}.ID`
-                    : companyName.toUpperCase()}
+                <div className="text-[9px] font-extrabold tracking-wider truncate">
+                  {qrPayload}
                 </div>
                 <div className="text-[9px] text-gray-700 font-mono">
                   {item.package_type} • {item.actual_kg} Kg • {item.dim_p}×{item.dim_l}×{item.dim_t} cm

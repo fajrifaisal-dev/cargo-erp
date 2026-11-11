@@ -21,7 +21,7 @@ export default async function AdminUsersPage() {
         badge={`${users.length} User`}
       />
 
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-3.5 sm:p-6 max-w-7xl mx-auto">
         <UserManagementClient
           users={users}
           companies={companies}

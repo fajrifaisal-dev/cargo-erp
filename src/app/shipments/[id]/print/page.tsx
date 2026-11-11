@@ -74,10 +74,10 @@ export default async function PrintShipmentPage({
   if (!shipment) notFound();
 
   const company = shipment.company || activeCompany;
-  const companyName = company?.name || 'PT. GEMA TUNGGAL PERKASA';
+  const companyName = company?.name || 'EKSPEDISI CARGO';
   const companySub = company?.slug
     ? `( ${company.slug.toUpperCase()} )`
-    : '( GEMA TRANS SURABAYA )';
+    : '';
   const items = shipment.items || [];
   const totalKoli = items.length;
 

@@ -18,6 +18,7 @@ import {
 } from '@/lib/utils';
 import { ShipmentStatusModal } from '@/components/shipments/ShipmentStatusModal';
 import { ShipmentDeleteButton } from '@/components/shipments/ShipmentDeleteButton';
+import { CopyTrackingButton } from '@/components/shipments/CopyTrackingButton';
 import { ControlPanel } from '@/components/layout/ControlPanel';
 
 export const revalidate = 0;
@@ -108,6 +109,7 @@ export default async function ShipmentDetailPage({
               <Tag className="w-3.5 h-3.5" />
               <span>Thermal Label</span>
             </Link>
+            <CopyTrackingButton receiptNumber={shipment.receipt_number} />
 
             {shipment.deleted_at ? (
               <ShipmentDeleteButton
@@ -129,7 +131,7 @@ export default async function ShipmentDetailPage({
         }
       />
 
-      <div className="p-6 space-y-5 max-w-6xl mx-auto text-xs">
+      <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5 max-w-6xl mx-auto text-xs">
         {shipment.deleted_at && (
           <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 flex flex-wrap items-center justify-between gap-3">
             <div>

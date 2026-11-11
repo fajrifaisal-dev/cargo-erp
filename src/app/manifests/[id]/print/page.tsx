@@ -66,13 +66,13 @@ export default async function PrintManifestPage({
             )}
             <div>
               <div className="text-base font-black uppercase">
-                {company?.name || 'PT. GEMA TUNGGAL PERKASA'}
+                {company?.name || 'EKSPEDISI CARGO'}
               </div>
               <div className="text-[10px]">
-                {company?.address || 'Jl. Kalimas Baru No.87, Surabaya'}
+                {company?.address || '-'}
               </div>
               <div className="text-[10px]">
-                Telp: {company?.phone || '031-1234567'} • Cabang Pelabuhan Tanjung Perak & Kalimas
+                Telp: {company?.phone || '-'}
               </div>
             </div>
           </div>
@@ -168,10 +168,10 @@ export default async function PrintManifestPage({
         {/* Tanda Tangan Serah Terima */}
         <div className="grid grid-cols-3 gap-4 border-t border-black pt-4 text-center text-[10px]">
           <div>
-            <div>Yang Menyerahkan (Gema Trans),</div>
+            <div>Yang Menyerahkan ({company?.name || 'Pihak Ekspedisi'}),</div>
             <div className="h-16"></div>
             <div className="border-t border-dotted border-black pt-0.5">
-              ( Kepala Gudang Kalimas )
+              ( Bagian Gudang / Operasional )
             </div>
           </div>
           <div>

@@ -7,7 +7,7 @@ interface CookieToSet {
   options: CookieOptions;
 }
 
-const PUBLIC_PATHS = ['/login', '/setup'];
+const PUBLIC_PATHS = ['/login', '/setup', '/track', '/resi'];
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({

@@ -25,14 +25,10 @@ export function CompanySettingsForm({ company }: CompanySettingsFormProps) {
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const [name, setName] = useState(company?.name || 'PT. GEMA TUNGGAL PERKASA');
-  const [phone, setPhone] = useState(company?.phone || '031-1234567');
-  const [address, setAddress] = useState(
-    company?.address || 'Jl. Kalimas Baru No.87, Perak Utara, Surabaya'
-  );
-  const [bankAccount, setBankAccount] = useState(
-    company?.bank_account || 'BCA 0123456789 a.n PT Gema Tunggal Perkasa'
-  );
+  const [name, setName] = useState(company?.name || '');
+  const [phone, setPhone] = useState(company?.phone || '');
+  const [address, setAddress] = useState(company?.address || '');
+  const [bankAccount, setBankAccount] = useState(company?.bank_account || '');
   const [logoUrl, setLogoUrl] = useState(company?.logo_url || '');
   const [brandColor, setBrandColor] = useState(company?.brand_color || '#4F46E5');
   const [brandAccent, setBrandAccent] = useState(company?.brand_accent || '#4338CA');

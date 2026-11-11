@@ -71,7 +71,7 @@ export default async function InvoiceDetailPage({
         }
       />
 
-      <div className="p-6 space-y-5 max-w-5xl mx-auto text-xs">
+      <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5 max-w-5xl mx-auto text-xs">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white border border-slate-200 rounded-3xl p-5 space-y-1.5 shadow-sm">
             <div className="text-brand font-bold uppercase text-[11px] pb-1.5 border-b border-slate-100">

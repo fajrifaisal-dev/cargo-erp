@@ -85,7 +85,7 @@ export default async function ManifestDetailPage({
         }
       />
 
-      <div className="p-6 space-y-5 max-w-6xl mx-auto text-xs">
+      <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-5 max-w-6xl mx-auto text-xs">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm">
             <div className="text-slate-500 text-[11px] font-semibold mb-1">Vendor Pelayaran</div>

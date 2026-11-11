@@ -11,11 +11,19 @@ const cairo = Cairo({
   variable: '--font-cairo',
 });
 
-export const metadata: Metadata = {
-  title: 'GEMA TRANS ERP | Logistics Management System',
-  description:
-    'Industrial Cargo & Expedition Logistics ERP for PT. Gema Tunggal Perkasa Surabaya',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const auth = await getAuthContext();
+  const isAuthenticated = Boolean(auth && !auth.needsMfaVerification);
+  const company = isAuthenticated ? auth?.activeCompany || null : null;
+
+  return {
+    title: company?.name
+      ? `${company.name} | Cargo ERP`
+      : 'Cargo ERP | Multi-Tenant Logistics Management System',
+    description:
+      'Multi-Tenant Industrial Cargo & Expedition Logistics ERP System',
+  };
+}
 
 export const revalidate = 0;
 
@@ -32,7 +40,7 @@ export default async function RootLayout({
   const brandPrimary = company?.brand_color || '#EAB308';
   const brandAccent = company?.brand_accent || '#CA8A04';
   const brandForeground = getContrastTextColor(brandPrimary);
-  const companyName = company?.name || 'PT. GEMA TUNGGAL PERKASA';
+  const companyName = company?.name || 'Cargo ERP';
   const activeCompanyId = company?.id || '';
 
   return (

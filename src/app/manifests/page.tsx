@@ -65,7 +65,7 @@ export default async function ManifestsPage({ searchParams }: ManifestsPageProps
         </form>
       </ControlPanel>
 
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-3.5 sm:p-6 max-w-7xl mx-auto">
         <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
           {manifests.length === 0 ? (
             <div className="p-12 text-center">

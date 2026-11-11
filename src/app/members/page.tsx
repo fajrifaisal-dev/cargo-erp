@@ -1,6 +1,7 @@
 import { Clock } from 'lucide-react';
 import { getMembers } from '@/app/actions/members';
 import { MemberModal } from '@/components/members/MemberModal';
+import { ImportMemberModal } from '@/components/members/ImportMemberModal';
 import { formatRupiah, formatDateIndo } from '@/lib/utils';
 import { ControlPanel } from '@/components/layout/ControlPanel';
 
@@ -15,10 +16,15 @@ export default async function MembersPage() {
         title="Master Member & Shipper Langganan"
         subtitle="Daftar pelanggan korporat repeat-shipper dengan plafon kredit dan termin pembayaran (TOP)."
         badge={`${members.length} Member`}
-        actions={<MemberModal mode="create" />}
+        actions={
+          <div className="flex items-center gap-2">
+            <ImportMemberModal />
+            <MemberModal mode="create" />
+          </div>
+        }
       />
 
-      <div className="p-6 max-w-7xl mx-auto text-xs">
+      <div className="p-3.5 sm:p-6 max-w-7xl mx-auto text-xs">
         <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
           {members.length === 0 ? (
             <div className="p-12 text-center text-slate-500">

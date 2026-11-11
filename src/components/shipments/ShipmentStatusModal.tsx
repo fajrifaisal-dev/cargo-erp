@@ -60,7 +60,7 @@ export function ShipmentStatusModal({
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                 <RefreshCw className="w-4 h-4 text-brand" />

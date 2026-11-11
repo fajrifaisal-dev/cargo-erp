@@ -80,7 +80,7 @@ export function MemberModal({ member, mode }: MemberModalProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-[2px] p-4 text-xs">
           <form
             onSubmit={handleSubmit}
-            className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl"
+            className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-5 sm:p-6 space-y-4 shadow-xl max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">

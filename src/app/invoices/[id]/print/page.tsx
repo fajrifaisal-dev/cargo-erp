@@ -54,13 +54,13 @@ export default async function PrintInvoicePage({
             )}
             <div>
               <div className="text-base font-black uppercase">
-                {company?.name || 'PT. GEMA TUNGGAL PERKASA'}
+                {company?.name || 'EKSPEDISI CARGO'}
               </div>
               <div className="text-[10px]">
-                {company?.address || 'Jl. Kalimas Baru No.87, Surabaya'}
+                {company?.address || '-'}
               </div>
               <div className="text-[10px]">
-                Telp: {company?.phone || '031-1234567'} • Rek: {company?.bank_account || 'BCA 0123456789'}
+                Telp: {company?.phone || '-'} • Rek: {company?.bank_account || '-'}
               </div>
             </div>
           </div>
@@ -94,7 +94,7 @@ export default async function PrintInvoicePage({
             </div>
             <div>
               <span className="font-bold">REKENING TRANSFER: </span>
-              <span>{company?.bank_account || 'BCA 0123456789 a.n PT Gema Tunggal Perkasa'}</span>
+              <span>{company?.bank_account || '-'}</span>
             </div>
           </div>
         </div>
@@ -188,7 +188,7 @@ export default async function PrintInvoicePage({
             </div>
           </div>
           <div>
-            <div>Hormat Kami (Gema Trans),</div>
+            <div>Hormat Kami ({company?.name || 'Pihak Ekspedisi'}),</div>
             <div className="h-16"></div>
             <div className="border-t border-dotted border-black pt-0.5">
               ( Bagian Keuangan & Penagihan )
