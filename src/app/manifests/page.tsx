@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { Ship, Plus, Printer, Eye } from 'lucide-react';
+import { Ship, Plus, Printer, Eye, Calendar } from 'lucide-react';
 import { getManifests } from '@/app/actions/manifests';
 import { formatRupiah, formatDateIndo } from '@/lib/utils';
 import { ControlPanel } from '@/components/layout/ControlPanel';
+import { ExportButtons } from '@/components/layout/ExportButtons';
 
 export const revalidate = 0;
 
@@ -10,14 +11,24 @@ interface ManifestsPageProps {
   searchParams: Promise<{
     search?: string;
     status?: string;
+    dateFrom?: string;
+    dateTo?: string;
   }>;
 }
 
 export default async function ManifestsPage({ searchParams }: ManifestsPageProps) {
   const params = await searchParams;
+  const hasActiveFilter = Boolean(
+    params.search ||
+      (params.status && params.status !== 'all') ||
+      params.dateFrom ||
+      params.dateTo
+  );
   const manifests = await getManifests({
     search: params.search,
     status: params.status,
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
   });
 
   return (
@@ -27,23 +38,59 @@ export default async function ManifestsPage({ searchParams }: ManifestsPageProps
         subtitle="Pengelompokan STT ke satu vendor pelayaran kontainer (Meratus, Temas, SPIL)."
         badge={`${manifests.length} Manifest`}
         actions={
-          <Link
-            href="/manifests/new"
-            className="flex items-center gap-1.5 px-4 h-9 text-xs font-bold rounded-xl bg-brand transition-colors shadow-sm"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Buat Manifest Baru</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportButtons
+              excelPath="/api/manifests/export"
+              pdfPath="/manifests/print-report"
+              filters={{
+                search: params.search,
+                status: params.status,
+                dateFrom: params.dateFrom,
+                dateTo: params.dateTo,
+              }}
+            />
+            <Link
+              href="/manifests/new"
+              className="flex items-center gap-1.5 px-4 h-9 text-xs font-bold rounded-xl bg-brand transition-colors shadow-sm"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Buat Manifest Baru</span>
+            </Link>
+          </div>
         }
       >
-        <form method="GET" className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+        <form method="GET" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-xs items-center">
           <input
             type="text"
             name="search"
             defaultValue={params.search || ''}
-            placeholder="Cari No Manifest / Vendor / Nama Kapal..."
+            placeholder="Cari No Manifest / Vendor / Kapal..."
             className="h-9 px-3 bg-slate-50 border border-slate-200 rounded-xl text-gray-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-brand"
           />
+
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 h-9">
+            <Calendar className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+            <input
+              type="date"
+              name="dateFrom"
+              title="Dari Tanggal Berangkat"
+              defaultValue={params.dateFrom || ''}
+              className="w-full bg-transparent text-gray-900 focus:outline-none"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 h-9">
+            <span className="text-[10px] text-slate-400 font-semibold flex-shrink-0">
+              s/d
+            </span>
+            <input
+              type="date"
+              name="dateTo"
+              title="Sampai Tanggal Berangkat"
+              defaultValue={params.dateTo || ''}
+              className="w-full bg-transparent text-gray-900 focus:outline-none"
+            />
+          </div>
 
           <select
             name="status"
@@ -56,12 +103,22 @@ export default async function ManifestsPage({ searchParams }: ManifestsPageProps
             <option value="Completed">Selesai Bongkar (Completed)</option>
           </select>
 
-          <button
-            type="submit"
-            className="h-9 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-gray-900 font-bold border border-slate-200 transition-colors"
-          >
-            Terapkan Filter
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="flex-1 h-9 px-4 rounded-xl bg-brand font-bold transition-colors"
+            >
+              Filter
+            </button>
+            {hasActiveFilter && (
+              <Link
+                href="/manifests"
+                className="px-3 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-gray-700 font-semibold border border-slate-200 inline-flex items-center"
+              >
+                Reset
+              </Link>
+            )}
+          </div>
         </form>
       </ControlPanel>
 

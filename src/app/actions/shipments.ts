@@ -100,6 +100,7 @@ function applyShipmentFilters(
       company:companies(*),
       member:members(*),
       manifest:manifest_shipments(*),
+      invoice:invoices(id, invoice_number),
       items:shipment_items(*)
     `)
     .eq('company_id', companyId)
@@ -186,6 +187,7 @@ export async function getShipmentById(id: string) {
       company:companies(*),
       member:members(*),
       manifest:manifest_shipments(*),
+      invoice:invoices(id, invoice_number),
       items:shipment_items(*)
     `)
     .eq('id', id)

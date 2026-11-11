@@ -21,6 +21,14 @@ import {
   normalizeMemberName,
   parseIntegerCell,
 } from '../member-import';
+import {
+  buildReportQueryString,
+  detectProofMimeFromBytes,
+  isSafeTenantProofPath,
+  MAX_PROOF_FILE_BYTES,
+  sanitizeExcelCell,
+  validateProofUploadMetadata,
+} from '../report-filters';
 
 describe('Cargo Calculations & Tenant Formatting', () => {
   it('calculates volumetric weight (P x L x T / 4000)', () => {
@@ -201,5 +209,63 @@ describe('Member Excel Import Deduplication & Parsing', () => {
     assert.equal(preview.rows[1].status, 'new');
     assert.equal(preview.rows[2].status, 'duplicate_file');
     assert.equal(preview.rows[3].status, 'invalid');
+  });
+});
+
+describe('Excel Export Sanitization & Payment Proof Upload Security', () => {
+  it('neutralizes spreadsheet formula injection while keeping numeric cells numeric', () => {
+    assert.equal(sanitizeExcelCell('=CMD|"/C calc"!A0'), '\'=CMD|"/C calc"!A0');
+    assert.equal(sanitizeExcelCell('+1+1'), '\'+1+1');
+    assert.equal(sanitizeExcelCell('-100'), '\'-100');
+    assert.equal(sanitizeExcelCell('@SUM(A1:A2)'), '\'@SUM(A1:A2)');
+    assert.equal(sanitizeExcelCell(250000), 250000);
+    assert.equal(sanitizeExcelCell('PT. Maju Jaya'), 'PT. Maju Jaya');
+  });
+
+  it('builds deterministic export query strings omitting default "all" values', () => {
+    assert.equal(
+      buildReportQueryString({
+        search: 'INV-001',
+        status: 'all',
+        dateFrom: '2026-11-01',
+        dateTo: '',
+      }),
+      '?search=INV-001&dateFrom=2026-11-01'
+    );
+    assert.equal(buildReportQueryString({ status: 'all' }), '');
+  });
+
+  it('validates real magic bytes for image/PDF proofs and blocks spoofing or >5MB files', () => {
+    const pngBytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
+    const jpegBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+    const htmlSpoofBytes = new Uint8Array([0x3c, 0x68, 0x74, 0x6d, 0x6c, 0x3e]); // <html>
+
+    assert.equal(detectProofMimeFromBytes(pngBytes), 'image/png');
+    assert.equal(detectProofMimeFromBytes(jpegBytes), 'image/jpeg');
+    assert.equal(detectProofMimeFromBytes(htmlSpoofBytes), null);
+
+    const okRes = validateProofUploadMetadata(1024, 'image/png', pngBytes);
+    assert.equal(okRes.ok, true);
+
+    const spoofRes = validateProofUploadMetadata(1024, 'image/png', htmlSpoofBytes);
+    assert.equal(spoofRes.ok, false);
+
+    const sizeRes = validateProofUploadMetadata(MAX_PROOF_FILE_BYTES + 1, 'image/png', pngBytes);
+    assert.equal(sizeRes.ok, false);
+  });
+
+  it('enforces tenant and invoice isolation on payment proof storage paths', () => {
+    assert.equal(
+      isSafeTenantProofPath('comp-1/inv-1/proof-123.png', 'comp-1', 'inv-1'),
+      true
+    );
+    assert.equal(
+      isSafeTenantProofPath('comp-2/inv-1/proof-123.png', 'comp-1', 'inv-1'),
+      false
+    );
+    assert.equal(
+      isSafeTenantProofPath('comp-1/inv-1/../../secret.png', 'comp-1', 'inv-1'),
+      false
+    );
   });
 });

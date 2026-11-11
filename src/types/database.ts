@@ -37,6 +37,7 @@ export interface ManifestShipment {
   shipments_count?: number;
   total_packages?: number;
   total_weight?: number;
+  total_cbm?: number;
   shipments?: Shipment[];
 }
 
@@ -125,6 +126,7 @@ export interface Shipment {
   company?: Company;
   member?: Member;
   manifest?: ManifestShipment;
+  invoice?: { id: string; invoice_number: string } | null;
   items?: ShipmentItem[];
 }
 

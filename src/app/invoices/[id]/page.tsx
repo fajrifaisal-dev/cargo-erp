@@ -5,10 +5,12 @@ import {
   ArrowLeft,
   ExternalLink,
   CheckCircle2,
+  FileText,
 } from 'lucide-react';
 import { getInvoiceById } from '@/app/actions/invoices';
 import { getAuthContext } from '@/lib/auth';
 import { formatRupiah, formatDateIndo } from '@/lib/utils';
+import { isPdfProofUrl } from '@/lib/report-filters';
 import { InvoicePaymentModal } from '@/components/invoices/InvoicePaymentModal';
 import { ControlPanel } from '@/components/layout/ControlPanel';
 
@@ -134,19 +136,47 @@ export default async function InvoiceDetailPage({
         </div>
 
         {invoice.payment_proof_url && (
-          <div className="p-4 rounded-3xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-emerald-800 font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              <span>Bukti transfer pembayaran telah diunggah.</span>
+          <div className="p-4 rounded-3xl bg-emerald-50 border border-emerald-200 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-emerald-800 font-semibold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <span>Bukti transfer pembayaran telah diunggah.</span>
+              </div>
+              <a
+                href={invoice.payment_proof_url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-brand hover:underline flex items-center gap-1 font-bold text-[11px]"
+              >
+                Buka Ukuran Penuh <ExternalLink className="w-3.5 h-3.5" />
+              </a>
             </div>
-            <a
-              href={invoice.payment_proof_url}
-              target="_blank"
-              rel="noreferrer"
-              className="text-brand hover:underline flex items-center gap-1 font-bold text-[11px]"
-            >
-              Lihat Bukti Transfer <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+
+            {isPdfProofUrl(invoice.payment_proof_url) ? (
+              <a
+                href={invoice.payment_proof_url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-white border border-emerald-200 text-gray-800 font-bold hover:bg-emerald-100/40 transition-colors"
+              >
+                <FileText className="w-4 h-4 text-rose-600" />
+                <span>Lihat Dokumen Bukti Bayar (PDF)</span>
+              </a>
+            ) : (
+              <a
+                href={invoice.payment_proof_url}
+                target="_blank"
+                rel="noreferrer"
+                className="block max-w-xs rounded-2xl overflow-hidden border border-emerald-200 bg-white shadow-xs hover:opacity-95 transition-opacity"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={invoice.payment_proof_url}
+                  alt={`Bukti transfer ${invoice.invoice_number}`}
+                  className="max-h-48 w-full object-contain bg-slate-50"
+                />
+              </a>
+            )}
           </div>
         )}
 

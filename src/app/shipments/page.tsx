@@ -13,6 +13,7 @@ import {
 import { getShipments } from '@/app/actions/shipments';
 import { formatRupiah, formatDateIndo } from '@/lib/utils';
 import { ControlPanel } from '@/components/layout/ControlPanel';
+import { ExportButtons } from '@/components/layout/ExportButtons';
 import { ShipmentDeleteButton } from '@/components/shipments/ShipmentDeleteButton';
 
 export const revalidate = 0;
@@ -58,7 +59,19 @@ export default async function ShipmentsPage({ searchParams }: ShipmentsPageProps
         }
         badge={`${shipments.length} Resi`}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportButtons
+              excelPath="/api/shipments/export"
+              pdfPath="/shipments/print-report"
+              filters={{
+                search: params.search,
+                status: params.status,
+                paymentStatus: params.paymentStatus,
+                dateFrom: params.dateFrom,
+                dateTo: params.dateTo,
+                trash: params.trash,
+              }}
+            />
             <Link
               href={isTrash ? '/shipments' : '/shipments?trash=1'}
               className={`flex items-center gap-1.5 px-3.5 h-9 text-xs font-semibold rounded-xl border transition-colors ${

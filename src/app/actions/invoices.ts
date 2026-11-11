@@ -10,7 +10,12 @@ import {
 } from '@/lib/security-rules';
 import { Invoice } from '@/types/database';
 
-export async function getInvoices(options?: { search?: string; status?: string }) {
+export async function getInvoices(options?: {
+  search?: string;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}) {
   const auth = await requireTenantAccess();
   const supabase = await createClient();
   const companyId = auth.activeCompanyId;
@@ -27,6 +32,14 @@ export async function getInvoices(options?: { search?: string; status?: string }
 
   if (options?.status && options.status !== 'all') {
     query = query.eq('status', options.status);
+  }
+
+  if (options?.dateFrom) {
+    query = query.gte('invoice_date', options.dateFrom);
+  }
+
+  if (options?.dateTo) {
+    query = query.lte('invoice_date', options.dateTo);
   }
 
   if (options?.search) {

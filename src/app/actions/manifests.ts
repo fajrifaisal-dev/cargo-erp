@@ -22,7 +22,12 @@ interface RawManifestRow extends Omit<ManifestShipment, 'shipments'> {
   }>;
 }
 
-export async function getManifests(options?: { search?: string; status?: string }) {
+export async function getManifests(options?: {
+  search?: string;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}) {
   const auth = await requireTenantAccess();
   const supabase = await createClient();
   const companyId = auth.activeCompanyId;
@@ -47,6 +52,14 @@ export async function getManifests(options?: { search?: string; status?: string 
     query = query.eq('status', options.status);
   }
 
+  if (options?.dateFrom) {
+    query = query.gte('departure_date', options.dateFrom);
+  }
+
+  if (options?.dateTo) {
+    query = query.lte('departure_date', options.dateTo);
+  }
+
   if (options?.search) {
     const s = options.search;
     query = query.or(`manifest_number.ilike.%${s}%,vendor_name.ilike.%${s}%,vessel_name.ilike.%${s}%,destination_city.ilike.%${s}%`);
@@ -63,11 +76,13 @@ export async function getManifests(options?: { search?: string; status?: string 
     const shipments = m.shipments || [];
     let totalPackages = 0;
     let totalWeight = 0;
+    let totalCbm = 0;
 
     shipments.forEach((s) => {
       (s.items || []).forEach((item) => {
         totalPackages += 1;
         totalWeight += Number(item.actual_kg || 0);
+        totalCbm += Number(item.volume_cbm || 0);
       });
     });
 
@@ -77,6 +92,7 @@ export async function getManifests(options?: { search?: string; status?: string 
       shipments_count: shipments.length,
       total_packages: totalPackages,
       total_weight: Math.round(totalWeight * 100) / 100,
+      total_cbm: Math.round(totalCbm * 1000) / 1000,
     } as ManifestShipment;
   });
 }
