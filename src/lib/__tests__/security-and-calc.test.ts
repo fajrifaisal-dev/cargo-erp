@@ -1,0 +1,123 @@
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  calculateCBM,
+  calculateVolumetricKg,
+  formatDateDDMMYYYY,
+  getTenantPrefix,
+  safeActionErrorMessage,
+} from '../utils';
+import {
+  canRoleManageInvoices,
+  canRoleManageSystem,
+  computeValidatedInvoiceTotal,
+  resolveAuthorizedCompany,
+  sanitizeNonNegativeAmount,
+  sanitizeNonNegativeFloat,
+} from '../security-rules';
+
+describe('Cargo Calculations & Tenant Formatting', () => {
+  it('calculates volumetric weight (P x L x T / 4000)', () => {
+    assert.equal(calculateVolumetricKg(40, 30, 30), 9);
+    assert.equal(calculateVolumetricKg(0, 30, 30), 0);
+  });
+
+  it('calculates CBM volume (P x L x T / 1,000,000)', () => {
+    assert.equal(calculateCBM(100, 100, 100), 1);
+    assert.equal(calculateCBM(50, 40, 20), 0.04);
+  });
+
+  it('builds tenant prefix from slug or company name and formats STT dates', () => {
+    assert.equal(
+      getTenantPrefix({ slug: 'gema-trans', name: 'PT. Gema Tunggal' }),
+      'GT'
+    );
+    assert.equal(
+      getTenantPrefix({ slug: '', name: 'PT. Cahaya Mandiri Jaya' }),
+      'CMJ'
+    );
+    assert.equal(formatDateDDMMYYYY('2026-11-11'), '11-11-2026');
+  });
+});
+
+describe('Error Sanitization Security', () => {
+  it('never leaks raw SQL, table names, or env details to clients', () => {
+    const originalConsoleError = console.error;
+    console.error = () => {};
+    try {
+      const msg = safeActionErrorMessage(
+        'test.context',
+        {
+          code: '42P01',
+          message: 'relation "public.profiles" does not exist in SUPABASE_SECRET_KEY',
+          details: 'ALTER TABLE shipments ADD COLUMN deleted_at',
+        },
+        'Terjadi kendala sistem. Silakan hubungi administrator.'
+      );
+
+      assert.equal(msg, 'Terjadi kendala sistem. Silakan hubungi administrator.');
+      assert.ok(!msg.includes('profiles'));
+      assert.ok(!msg.includes('SUPABASE_SECRET_KEY'));
+      assert.ok(!msg.includes('ALTER TABLE'));
+    } finally {
+      console.error = originalConsoleError;
+    }
+  });
+
+  it('maps known safe database codes to clean Indonesian messages', () => {
+    const originalConsoleError = console.error;
+    console.error = () => {};
+    try {
+      assert.match(
+        safeActionErrorMessage('dup', { code: '23505', message: 'unique' }, 'fallback'),
+        /duplikat/i
+      );
+      assert.match(
+        safeActionErrorMessage('fk', { code: '23503', message: 'fk' }, 'fallback'),
+        /digunakan/i
+      );
+      assert.match(
+        safeActionErrorMessage('rls', { code: '42501', message: 'rls' }, 'fallback'),
+        /ditolak/i
+      );
+    } finally {
+      console.error = originalConsoleError;
+    }
+  });
+});
+
+describe('Server Financial Validation & RBAC Guards', () => {
+  it('rejects negative or non-finite monetary and dimension inputs', () => {
+    assert.equal(sanitizeNonNegativeAmount(10500.6, 'Ongkir'), 10501);
+    assert.equal(sanitizeNonNegativeFloat(12.5, 'Berat'), 12.5);
+    assert.throws(() => sanitizeNonNegativeAmount(-1, 'Ongkir'), /tidak valid/i);
+    assert.throws(() => sanitizeNonNegativeAmount(Number.NaN, 'Diskon'), /tidak valid/i);
+    assert.throws(() => sanitizeNonNegativeFloat(-0.5, 'Berat'), /tidak valid/i);
+  });
+
+  it('prevents invoice discounts greater than subtotal', () => {
+    const ok = computeValidatedInvoiceTotal(100000, 25000);
+    assert.deepEqual(ok, { discount: 25000, total: 75000 });
+    assert.throws(
+      () => computeValidatedInvoiceTotal(100000, 150000),
+      /melebihi subtotal/i
+    );
+  });
+
+  it('enforces invoice & system permissions per role (marketing read-only on invoices)', () => {
+    assert.equal(canRoleManageInvoices('master_admin'), true);
+    assert.equal(canRoleManageInvoices('finance'), true);
+    assert.equal(canRoleManageInvoices('marketing'), false);
+    assert.equal(canRoleManageInvoices(null), false);
+
+    assert.equal(canRoleManageSystem(true), true);
+    assert.equal(canRoleManageSystem(false), false);
+  });
+
+  it('blocks tenant cookie spoofing via allowlist resolution', () => {
+    const allowed = [{ id: 'tenant-a' }, { id: 'tenant-b' }];
+    assert.equal(resolveAuthorizedCompany(allowed, 'tenant-b')?.id, 'tenant-b');
+    assert.equal(resolveAuthorizedCompany(allowed, 'tenant-hack')?.id, 'tenant-a');
+    assert.equal(resolveAuthorizedCompany([], 'tenant-a'), null);
+  });
+});
